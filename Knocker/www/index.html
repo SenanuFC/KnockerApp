@@ -1,19 +1,23 @@
 <!DOCTYPE html>
 <html>
-  <head>
+<head>
     <meta charset="utf-8">
     <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no, width=device-width">
     <title></title>
 
     <style>
-      .angular-google-map-container {
-          width: 100%;
-          height: 504px;
-      }
+        .angular-google-map-container {
+            width: 100%;
+            height: 504px;
+        }
     </style>
 
     <link href="/css/preview-frame.css" rel="stylesheet">
     <link href="lib/ionic/css/ionic.css" rel="stylesheet">
+
+    <script src="lib/ngCordova/dist/ng-cordova.js"></script>
+    <script src="cordova.js"></script>
+
 
     <!-- ionic/angularjs js -->
     <script src="lib/ionic/js/ionic.bundle.js"></script>
@@ -24,88 +28,180 @@
 
 
     <script>
-// Ionic Starter App
+        // Ionic Starter App
 
-// angular.module is a global place for creating, registering and retrieving Angular modules
-// 'starter' is the name of this angular module example (also set in a <body> attribute in index.html)
-// the 2nd parameter is an array of 'requires'
-// 'starter.services' is found in services.js
-// 'starter.controllers' is found in controllers.js
-angular.module('app', ['ionic'])
-
-.run(function($ionicPlatform) {
-  $ionicPlatform.ready(function() {
-    // Hide the accessory bar by default (remove this to show the accessory bar above the keyboard
-    // for form inputs)
-    if(window.cordova && window.cordova.plugins.Keyboard) {
-      cordova.plugins.Keyboard.hideKeyboardAccessoryBar(true);
-    }
-    if(window.StatusBar) {
-      // org.apache.cordova.statusbar required
-      StatusBar.styleDefault();
-    }
-  });
-})
-
-.config(function($stateProvider, $urlRouterProvider) {
-
-  // Ionic uses AngularUI Router which uses the concept of states
-  // Learn more here: https://github.com/angular-ui/ui-router
-  // Set up the various states which the app can be in.
-  // Each state's controller can be found in controllers.js
-  $stateProvider
-    
-    .state('page3', {
-      url: '',
-      templateUrl: 'page3.html'
-    })
-    ;
-
-  // if none of the above states are matched, use this as the fallback
-  
-  $urlRouterProvider.otherwise('');
-})
-
-.controller('AppCtrl',function($scope, $ionicModal, $http, $timeout) {
-  $scope.image;
-  $scope.img_count = 1;
+        // angular.module is a global place for creating, registering and retrieving Angular modules
+        // 'starter' is the name of this angular module example (also set in a <body> attribute in index.html)
+        // the 2nd parameter is an array of 'requires'
+        // 'starter.services' is found in services.js
+        // 'starter.controllers' is found in controllers.js
+        angular.module('app', ['ionic'])
 
 
-    $scope.inc_count = function(){
-      $scope.img_count=$scope.img_count+1;
-      console.log("+1");
-    }
+                .run(function($ionicPlatform) {
+                    $ionicPlatform.ready(function() {
+                        // Hide the accessory bar by default (remove this to show the accessory bar above the keyboard
+                        // for form inputs)
+                        if(window.cordova && window.cordova.plugins.Keyboard) {
+                            cordova.plugins.Keyboard.hideKeyboardAccessoryBar(true);
+                        }
+                        if(window.StatusBar) {
+                            // org.apache.cordova.statusbar required
+                            StatusBar.styleDefault();
+                        }
+                    });
 
-   $scope.get_image = function () {
-            console.log('Getting image');
-            $scope.inc_count();
-            $http.get("http://cs.ashesi.edu.gh/~csashesi/class2015/senanu-fiam-coblavie/kitten.jpg")
-                .success(function (response) {
-                    $scope.image = response;
+                    $ionicPlatform.ready(function() {
+                        $cordovaPlugin.someFunction().then(success, error);
+                    });
+                })
+
+                .config(function($stateProvider, $urlRouterProvider, $httpProvider) {
+
+                    // Ionic uses AngularUI Router which uses the concept of states
+                    // Learn more here: https://github.com/angular-ui/ui-router
+                    // Set up the various states which the app can be in.
+                    // Each state's controller can be found in controllers.js
+                    $stateProvider
+
+                            .state('page3', {
+                                url: '',
+                                templateUrl: 'page3.html'
+                            })
+                    ;
+
+                    // if none of the above states are matched, use this as the fallback
+
+                    $urlRouterProvider.otherwise('');
+                    $httpProvider.interceptors.push(function($rootScope) {
+                        return {
+                            request: function(config) {
+                                $rootScope.$broadcast('loading:show')
+                                return config
+                            },
+                            response: function(response) {
+                                $rootScope.$broadcast('loading:hide')
+                                return response
+                            }
+                        }
+                    })
+                })
+
+                .controller('AppCtrl',function($scope, $ionicModal, $http, $timeout, $state, $ionicLoading) {
+                    $scope.image;
+                    $scope.mainImage=[];
+
+                    $scope.show = function() {
+                        $ionicLoading.show({
+                            template: 'Loading...'
+                        });
+                    };
+                    $scope.hide = function(){
+                        $ionicLoading.hide();
+                    };
+
+                    $scope.store = {
+                        save: function (key, data) {
+                            localStorage.setItem(key, data);
+                        },
+                        retrieve: function (key) {
+                            return localStorage.getItem(key);
+                        }
+                    }
+
+                    if($scope.store.retrieve("count")==undefined){
+                        $scope.img_count = 0;
+                    }
+                    else{
+                        $scope.img_count = $scope.store.retrieve("count");
+                    }
+
+                    $scope.count_max;
+
+
+                    $scope.get_image = function () {
+                        console.log('Getting image');
+                        $scope.inc_count();
+                        $scope.url ="http://cs.ashesi.edu.gh/~csashesi/class2015/senanu-fiam-coblavie/image"+img_count+".jpg";
+
+                        $http.get(url)
+                                .success(function (response) {
+                                    $scope.image = response;
+                                });
+
+                        console.log("Failed loaded");
+                    }
+
+                    $scope.addImage=function(url){
+                        $scope.mainImage.push(url);
+                    }
+
+                    $scope.loadImages=function(){
+                        count=0;
+                        while(count!=$scope.count_max){
+                            $scope.url ="http://cs.ashesi.edu.gh/~csashesi/class2015/senanu-fiam-coblavie/image"+count+".jpg";
+                            $scope.addImage($scope.url);
+                            count++;
+                        }
+                    }
+
+
+
+                    $scope.get_count = function() {
+                        $http.get("http://cs.ashesi.edu.gh/~csashesi/class2015/senanu-fiam-coblavie/num.json")
+                                .success(function (response){
+                                    console.log("response");
+                                    $scope.img_count = response;
+                                });
+
+                        $http.get("http://cs.ashesi.edu.gh/~csashesi/class2015/senanu-fiam-coblavie/num.php").success(function(response){
+                            console.log(response);
+                            $scope.count_max = response.count;
+                        });
+
+                    }
+
+                    $scope.get_count();
+
+                    $scope.chk_count = function(){
+                        $scope.get_count();
+                        console.log('Comparing max and img_count');
+                        if($scope.MAX<=$scope.img_count){
+                            console.log("Exceeded img count");
+                            $scope.reset();
+                        }
+                        else {
+                            return true;
+                        }
+                    }
+
+
+                    $scope.inc_count = function(){
+                        $scope.show();
+                        if($scope.chk_count()){
+                            $scope.img_count=parseInt($scope.img_count)+1;
+                            $scope.store.save("count", $scope.img_count);
+                            console.log("+1");
+                            window.location.reload();
+
+                        }
+                    }
+
+                    $scope.reset = function(){
+                        $scope.show();
+                        console.log("Resetting");
+                        $scope.store.save("count", 0);
+                        window.location.reload();
+                    }
+
+
                 });
-                
-          console.log("Failed loaded");
-    }
-
-  
-
-    $scope.get_count = function() {
-        $http.get("http://cs.ashesi.edu.gh/~csashesi/class2015/senanu-fiam-coblavie/num.json")
-          .success(function (response){
-            console.log("sth");
-            $scope.img_count = response;
-          });
-    }
-
-    
-
-});
 
 
     </script>
-  </head>
-  <body ng-app="app" ng-controller = "AppCtrl"  animation="slide-left-right-ios7">
-  <div style="">
+</head>
+<body ng-app="app" ng-controller = "AppCtrl"  animation="slide-left-right-ios7">
+<div style="">
     <div style="">
         <ion-nav-bar class="bar-stable">
             <ion-nav-back-button class="button-icon icon ion-ios7-arrow-back">Back</ion-nav-back-button>
@@ -114,36 +210,42 @@ angular.module('app', ['ionic'])
     </div>
 </div>
 <script id="page3.html" type="text/ng-template">
-<ion-view style="" title="Page">
-    <ion-content class="has-header" padding="true">
-        <h1 style="">Knocker System</h1>
-        <div style="height: 100px;" class="spacer"></div>
-        <img src={{image}}></img>
-        <button ng-click = "getcount()" style="" class="button button-dark button-block" >Refresh</button>
-        <button ng-click ="get_image()" style="" class="button button-energized button-block">ON</button>
+    <ion-view style="" title="Page">
+        <ion-content class="has-header" padding="true">
+            <h1 style="">Knocker System</h1>
+            <div style="height: 100px;" class="spacer"></div>
 
-        <div style="" class="button-bar"></div>
-        <img src="http://cs.ashesi.edu.gh/~csashesi/class2015/senanu-fiam-coblavie/kitten.jpg" height=250 width=250>{{image}}</img>
+            <button ng-click = "inc_count()" style="" class="button button-dark button-block" >Refresh</button>
+            <button ng-click = "reset()" style="" class="button  button-block" >Reset</button>
 
-      count: {{img_count}}
-      <ul class="list">
+            <ul class>
+                <li ng-repeat="img in mainImages">
+                    <img ng-src="{{img}}" ng-click="setImage(img)">
+                </li>
+            </ul>
 
-        <li class="item item-toggle">
-           HTML5
-           <label class="toggle toggle-assertive">
-             <input type="checkbox">
-             <div class="track">
-               <div class="handle"></div>
-             </div>
-           </label>
-        </li>
+            <div style="" class="button-bar"></div>
+            <img src="http://cs.ashesi.edu.gh/~csashesi/class2015/senanu-fiam-coblavie/image{{img_count}}.jpg" alt="Press Reset" height=250 width=250>{{image}}</img>
+
+            count: {{img_count}} Max: {{MAX}}
+            <ul class="list">
+
+                <li class="item item-toggle">
+
+                    <label class="toggle toggle-assertive">
+                        <input type="checkbox">
+                        <div class="track">
+                            <div class="handle"></div>
+                        </div>
+                    </label>
+                </li>
 
 
-      </ul>
+            </ul>
 
-    </ion-content>
-</ion-view></script>
+        </ion-content>
+    </ion-view></script>
 
 
-  </body>
+</body>
 </html>
