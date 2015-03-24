@@ -51,9 +51,6 @@
                         }
                     });
 
-                    $ionicPlatform.ready(function() {
-                        $cordovaPlugin.someFunction().then(success, error);
-                    });
                 })
 
                 .config(function($stateProvider, $urlRouterProvider, $httpProvider) {
@@ -87,9 +84,10 @@
                     })
                 })
 
-                .controller('AppCtrl',function($scope, $ionicModal, $http, $timeout, $state, $ionicLoading) {
+                .controller('AppCtrl',function($scope, $ionicModal, $http, $timeout, $state, $ionicLoading, $ionicModal) {
                     $scope.image;
                     $scope.mainImage=[];
+
 
                     $scope.show = function() {
                         $ionicLoading.show({
@@ -140,12 +138,15 @@
                         count=0;
                         while(count!=$scope.count_max){
                             $scope.url ="http://cs.ashesi.edu.gh/~csashesi/class2015/senanu-fiam-coblavie/image"+count+".jpg";
+                            $scope.allImages.push("{'src':'"+$scope.url+"'}");
                             $scope.addImage($scope.url);
+                            console.log(count);
                             count++;
                         }
+                        console.log("Loading imgs");
                     }
 
-
+            
 
                     $scope.get_count = function() {
                         $http.get("http://cs.ashesi.edu.gh/~csashesi/class2015/senanu-fiam-coblavie/num.json")
@@ -187,6 +188,17 @@
                         }
                     }
 
+                    $scope.decrease_count = function(){
+                        $scope.show();
+                        if($scope.chk_count()&&$scope.img_count>0){
+                            $scope.img_count=parseInt($scope.img_count)-1;
+                            $scope.store.save("count", $scope.img_count);
+                            console.log("+1");
+                            window.location.reload();
+
+                        }
+                    }
+
                     $scope.reset = function(){
                         $scope.show();
                         console.log("Resetting");
@@ -210,12 +222,13 @@
     </div>
 </div>
 <script id="page3.html" type="text/ng-template">
-    <ion-view style="" title="Page">
+
+    <ion-view style="" title="Knocker System">
         <ion-content class="has-header" padding="true">
-            <h1 style="">Knocker System</h1>
             <div style="height: 100px;" class="spacer"></div>
 
-            <button ng-click = "inc_count()" style="" class="button button-dark button-block" >Refresh</button>
+            <button ng-click = "inc_count()" style="" class="button button-dark button-block" >Next</button>
+            <button ng-click = "decrease_count()" style="" class="button button-dark button-block" >Previous</button>
             <button ng-click = "reset()" style="" class="button  button-block" >Reset</button>
 
             <ul class>
@@ -244,7 +257,9 @@
             </ul>
 
         </ion-content>
-    </ion-view></script>
+    </ion-view>
+
+    </script>
 
 
 </body>

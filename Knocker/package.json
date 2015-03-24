@@ -1,7 +1,7 @@
 {
-  "name": "%5Bappname%5D",
+  "name": "Knocker",
   "version": "1.0.0",
-  "description": "[appName]: An Ionic project",
+  "description": "com.Knocker.BSW: An Ionic project",
   "dependencies": {
     "gulp": "^3.5.6",
     "gulp-sass": "^0.7.1",
